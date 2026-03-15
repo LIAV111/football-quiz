@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>חידון כדורגל</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f5f5f0;min-height:100vh;padding:2rem 1rem}
+.quiz{max-width:680px;margin:0 auto;direction:rtl}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.title{font-size:22px;font-weight:500;color:#1a1a18}
+.scorebar{display:flex;gap:12px}
+.stat{background:#eeece5;border-radius:8px;padding:8px 14px;text-align:center}
+.stat-val{font-size:20px;font-weight:500;color:#1a1a18}
+.stat-lbl{font-size:11px;color:#5f5e5a;margin-top:2px}
+.progress-wrap{margin-bottom:1.5rem}
+.progress-bar{height:5px;background:#eeece5;border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:#639922;border-radius:4px;transition:width 0.4s}
+.progress-txt{font-size:12px;color:#888780;margin-top:6px}
+.q-card{background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.category-badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;margin-bottom:10px;font-weight:500;background:#EAF3DE;color:#3B6D11}
+.difficulty{float:left;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+.diff-easy{background:#EAF3DE;color:#3B6D11}
+.diff-medium{background:#FAEEDA;color:#633806}
+.diff-hard{background:#FCEBEB;color:#791F1F}
+.diff-expert{background:#EEEDFE;color:#3C3489}
+.q-text{font-size:16px;font-weight:500;color:#1a1a18;line-height:1.5;margin-bottom:1rem;clear:both;padding-top:4px}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt-btn{background:#fff;border:0.5px solid #b4b2a9;border-radius:8px;padding:10px 14px;text-align:right;font-size:14px;color:#1a1a18;cursor:pointer;transition:background 0.15s,border-color 0.15s;line-height:1.4;font-family:inherit}
+.opt-btn:hover{background:#f5f5f0;border-color:#888780}
+.opt-btn.correct{background:#EAF3DE;border-color:#639922;color:#27500A;font-weight:500}
+.opt-btn.wrong{background:#FCEBEB;border-color:#E24B4A;color:#791F1F}
+.opt-btn:disabled{cursor:default}
+.feedback{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:14px;line-height:1.5}
+.feedback.correct{background:#EAF3DE;color:#27500A}
+.feedback.wrong{background:#FCEBEB;color:#791F1F}
+.nav-row{display:flex;gap:10px;margin-top:1rem;justify-content:flex-start}
+.nav-btn{padding:9px 20px;font-size:14px;border-radius:8px;border:0.5px solid #b4b2a9;background:#fff;color:#1a1a18;cursor:pointer;font-family:inherit}
+.nav-btn:hover{background:#f5f5f0}
+.nav-btn.primary{background:#639922;border-color:#639922;color:white;font-weight:500}
+.nav-btn.primary:hover{background:#3B6D11}
+.result-card{background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:2rem;text-align:center}
+.result-score{font-size:52px;font-weight:500;color:#639922;margin:1rem 0}
+.result-label{font-size:16px;color:#888780}
+.result-title{font-size:20px;font-weight:500;color:#1a1a18;margin-bottom:8px}
+.medals{font-size:28px;margin:12px 0;letter-spacing:6px}
+.review-item{background:#f5f5f0;border-radius:8px;padding:10px 14px;margin-top:8px;text-align:right;font-size:13px}
+.review-q{font-weight:500;color:#1a1a18;margin-bottom:4px}
+.review-correct{color:#3B6D11}
+.review-wrong{color:#A32D2D}
+.timer-wrap{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.timer-bar{flex:1;height:4px;background:#eeece5;border-radius:4px;overflow:hidden}
+.timer-fill{height:100%;background:#639922;border-radius:4px;transition:width 0.1s linear}
+.timer-txt{font-size:12px;color:#888780;min-width:32px;text-align:left}
+</style>
+</head>
+<body>
+<div class="quiz" id="quiz"></div>
+
+<script>
+const questions = [
+  {q:"איזה שחקן זכה בכי הרבה כדורי זהב בהיסטוריה?",opts:["קריסטיאנו רונאלדו","ליאונל מסי","רונאלדינהו","זינדין זידאן"],ans:1,cat:"פרסים",diff:"medium",explain:"מסי זכה ב-8 כדורי זהב (עד 2023), יותר מכל שחקן אחר בהיסטוריה."},
+  {q:"באיזו שנה זכתה ברצלונה בטרבל ההיסטורי של פ'פ גווארדיולה?",opts:["2008","2009","2010","2011"],ans:1,cat:"מועדונים",diff:"hard",explain:"עונת 2008/09 — ברצלונה זכתה בליגה, גביע המלך וליגת האלופות."},
+  {q:"מי קבע את שיא השערים בליגת האלופות בעונה אחת (17 שערים)?",opts:["רונאלדו","מסי","לואיס סוארס","רוברט לבנדובסקי"],ans:0,cat:"שיאים",diff:"hard",explain:"רונאלדו קבע 17 שערים בעונת 2013/14 עם ריאל מדריד."},
+  {q:"איזו נבחרת זכתה ב-4 גביעי עולם רצופים?",opts:["ברזיל","גרמניה","איטליה","אף אחת"],ans:3,cat:"גביע עולם",diff:"expert",explain:"אף נבחרת לא זכתה ב-4 גביעי עולם רצופים. ברזיל זכתה ב-5 סך הכל אך לא ברצף."},
+  {q:"מי הוא המאמן עם הכי הרבה תוארי ליגת האלופות?",opts:["פ'פ גווארדיולה","זינדין זידאן","קרלו אנצ'לוטי","אלכס פרגוסון"],ans:2,cat:"מאמנים",diff:"expert",explain:"קרלו אנצ'לוטי זכה ב-4 תוארי ליגת האלופות (AC מילאן פעמיים, ריאל מדריד פעמיים)."},
+  {q:"איזה מועדון זכה בכי הרבה תוארי ליגת האלופות?",opts:["ברצלונה","בייארן מינכן","ריאל מדריד","AC מילאן"],ans:2,cat:"מועדונים",diff:"easy",explain:"ריאל מדריד זכתה ב-14 תוארי ליגת האלופות/גביע אירופה — הכי הרבה בהיסטוריה."},
+  {q:"מי כבש את שער ה'יד האלוהים' נגד אנגליה ב-1986?",opts:["רונאלדינהו","דייגו מרדונה","פלה","רומריו"],ans:1,cat:"גביע עולם",diff:"easy",explain:"מרדונה כבש את השער המפורסם ברבע גמר מונדיאל 1986 נגד אנגליה."},
+  {q:"כמה שחקנים מותר להחליף בליגת האלופות (כיום)?",opts:["3","4","5","6"],ans:2,cat:"חוקים",diff:"medium",explain:"מ-2022, FIFA אפשרה 5 חילופים בכל משחק ברוב התחרויות."},
+  {q:"באיזו מדינה מתקיים מונדיאל 2026?",opts:["ספרד בלבד","ארה'ב בלבד","ארה'ב, קנדה ומקסיקו","פורטוגל וספרד"],ans:2,cat:"גביע עולם",diff:"medium",explain:"מונדיאל 2026 ייערך בשלוש מדינות: ארה'ב, קנדה ומקסיקו."},
+  {q:"מי קבע את שיא השערים בגביע עולם אחד (13 שערים)?",opts:["רונאלדו","יוסט פונטן","גרד מולר","מירוסלב קלוזה"],ans:1,cat:"שיאים",diff:"expert",explain:"יוסט פונטן הצרפתי קבע 13 שערים במונדיאל 1958 — שיא שלא נשבר עד היום."},
+  {q:"איזה שחקן ידוע בכינוי 'El Fenomeno'?",opts:["רונאלדו הברזילאי","ריבלדו","רונאלדינהו","רומריו"],ans:0,cat:"שחקנים",diff:"medium",explain:"רונאלדו נזריו (הברזילאי) כונה 'El Fenomeno' — התופעה."},
+  {q:"כמה קבוצות ישתתפו במונדיאל 2026?",opts:["32","36","48","64"],ans:2,cat:"גביע עולם",diff:"medium",explain:"מונדיאל 2026 יורחב ל-48 נבחרות — לראשונה בהיסטוריה."},
+];
+
+let current=0, score=0, answered=false, userAnswers=[], timer=null, timeLeft=20;
+const TOTAL=questions.length;
+
+function render(){
+  const q=questions[current];
+  const pct=Math.round((current/TOTAL)*100);
+  document.getElementById('quiz').innerHTML=`
+    <div class="header">
+      <div class="title">חידון כדורגל</div>
+      <div class="scorebar">
+        <div class="stat"><div class="stat-val" id="sc">${score}</div><div class="stat-lbl">נקודות</div></div>
+        <div class="stat"><div class="stat-val">${current+1}/${TOTAL}</div><div class="stat-lbl">שאלה</div></div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-txt">${pct}% הושלם</div>
+    </div>
+    <div class="q-card">
+      <div>
+        <span class="category-badge">${q.cat}</span>
+        <span class="difficulty diff-${q.diff}" style="float:left">${{easy:'קל',medium:'בינוני',hard:'קשה',expert:'מומחה'}[q.diff]}</span>
+      </div>
+      <div class="timer-wrap" style="margin-top:8px">
+        <div class="timer-bar"><div class="timer-fill" id="tfill" style="width:100%"></div></div>
+        <div class="timer-txt" id="ttxt">20s</div>
+      </div>
+      <div class="q-text">${q.q}</div>
+      <div class="options" id="opts">
+        ${q.opts.map((o,i)=>`<button class="opt-btn" onclick="pick(${i})">${o}</button>`).join('')}
+      </div>
+      <div id="feedback"></div>
+    </div>
+    <div class="nav-row" id="nav"></div>
+  `;
+  startTimer();
+}
+
+function startTimer(){
+  timeLeft=20;
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    timeLeft--;
+    const fill=document.getElementById('tfill');
+    const txt=document.getElementById('ttxt');
+    if(fill) fill.style.width=(timeLeft/20*100)+'%';
+    if(txt) txt.textContent=timeLeft+'s';
+    if(fill && timeLeft<=5) fill.style.background='#E24B4A';
+    if(timeLeft<=0){clearInterval(timer);timeUp();}
+  },1000);
+}
+
+function timeUp(){
+  if(answered) return;
+  answered=true;
+  userAnswers.push({q:current,chosen:-1,correct:false});
+  showFeedback(-1);
+}
+
+function pick(i){
+  if(answered) return;
+  answered=true;
+  clearInterval(timer);
+  const q=questions[current];
+  const correct=(i===q.ans);
+  if(correct) score+=getDiffPoints(q.diff);
+  userAnswers.push({q:current,chosen:i,correct});
+  showFeedback(i);
+}
+
+function getDiffPoints(d){return{easy:1,medium:2,hard:3,expert:5}[d]||1;}
+
+function showFeedback(chosen){
+  const q=questions[current];
+  const btns=document.querySelectorAll('.opt-btn');
+  btns.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.ans) b.classList.add('correct');
+    else if(i===chosen && chosen!==q.ans) b.classList.add('wrong');
+  });
+  const fb=document.getElementById('feedback');
+  const ok=(chosen===q.ans);
+  const pts=getDiffPoints(q.diff);
+  const answerText=q.opts[q.ans];
+  fb.innerHTML=`<div class="feedback ${ok?'correct':'wrong'}">${ok?'✓ נכון! +'+pts+' נקודות':'✗ '+(chosen===-1?'הזמן נגמר! ':'לא נכון. ')+'התשובה הנכונה: <strong>'+answerText+'</strong>'}<br><span style="font-size:12px;opacity:0.85;margin-top:4px;display:block">${q.explain}</span></div>`;
+  document.getElementById('sc').textContent=score;
+  const nav=document.getElementById('nav');
+  if(current<TOTAL-1){
+    nav.innerHTML=`<button class="nav-btn primary" onclick="next()">השאלה הבאה ←</button>`;
+  } else {
+    nav.innerHTML=`<button class="nav-btn primary" onclick="showResult()">סיים וראה תוצאה ←</button>`;
+  }
+}
+
+function next(){
+  answered=false;
+  current++;
+  render();
+}
+
+function showResult(){
+  clearInterval(timer);
+  const maxScore=questions.reduce((a,q)=>a+getDiffPoints(q.diff),0);
+  const pct=Math.round(score/maxScore*100);
+  let title,medals;
+  if(pct>=90){title='אגדת כדורגל!';medals='⚽⚽⚽';}
+  else if(pct>=70){title='מומחה כדורגל';medals='⚽⚽';}
+  else if(pct>=50){title='אוהד ותיק';medals='⚽';}
+  else{title='יש עוד לאן לגדול';medals='';}
+
+  const wrongItems=userAnswers.filter(a=>!a.correct).map(a=>{
+    const q=questions[a.q];
+    return `<div class="review-item"><div class="review-q">${q.q}</div><div class="review-a"><span class="review-wrong">${a.chosen>=0?q.opts[a.chosen]:'(לא ענית)'}</span> → <span class="review-correct">${q.opts[q.ans]}</span></div></div>`;
+  }).join('');
+
+  document.getElementById('quiz').innerHTML=`
+    <div class="header">
+      <div class="title">תוצאות</div>
+    </div>
+    <div class="result-card">
+      <div class="result-title">${title}</div>
+      ${medals?`<div class="medals">${medals}</div>`:''}
+      <div class="result-score">${score} / ${maxScore}</div>
+      <div class="result-label">${pct}% מהנקודות</div>
+      <div style="margin-top:6px;font-size:13px;color:#888780">${userAnswers.filter(a=>a.correct).length} תשובות נכונות מתוך ${TOTAL}</div>
+    </div>
+    ${wrongItems?`<div style="margin-top:1.5rem"><div style="font-size:14px;font-weight:500;color:#1a1a18;margin-bottom:8px">שאלות שפספסת:</div>${wrongItems}</div>`:''}
+    <div class="nav-row" style="margin-top:1.5rem">
+      <button class="nav-btn primary" onclick="restart()">שחק שוב ←</button>
+    </div>
+  `;
+}
+
+function restart(){
+  current=0;score=0;answered=false;userAnswers=[];
+  questions.sort(()=>Math.random()-0.5);
+  render();
+}
+
+questions.sort(()=>Math.random()-0.5);
+render();
+</script>
+</body>
+</html>
